@@ -1,0 +1,39 @@
+# ===== Secrets & environnement =====
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.crt
+*.secret
+
+# ===== Logs & diagnostics =====
+*.log
+diagnostic.txt
+config-server.log
+
+# ===== Build Maven =====
+target/
+*.jar
+*.war
+!.mvn/wrapper/maven-wrapper.jar
+
+# ===== IDE =====
+.idea/
+*.iml
+.vscode/
+*.swp
+.classpath
+.project
+.settings/
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+
+# ===== Docker =====
+*.pid
+
+# ===== Node (si frontend dans le monorepo plus tard) =====
+node_modules/
+dist/
