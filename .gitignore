@@ -2,38 +2,77 @@
 .env
 .env.*
 !.env.example
+.envrc
 *.key
 *.pem
 *.crt
+*.p12
+*.jks
+*.keystore
 *.secret
+secrets.yml
+secrets.yaml
+secrets.json
+*-local.yml
+*-local.properties
+application-local.yml
+application-local.properties
 
 # ===== Logs & diagnostics =====
 *.log
-diagnostic.txt
-config-server.log
+*.log.*
+logs/
+diagnostic*.txt
 
 # ===== Build Maven =====
 target/
+*.class
 *.jar
 *.war
+*.hprof
+hs_err_pid*
+replay_pid*
 !.mvn/wrapper/maven-wrapper.jar
+dependency-reduced-pom.xml
+.flattened-pom.xml
+
+# ===== Fichiers temporaires =====
+*.bak
+*.orig
+*.rej
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
 
 # ===== IDE =====
 .idea/
 *.iml
+*.ipr
+*.iws
 .vscode/
-*.swp
 .classpath
 .project
 .settings/
+.factorypath
+.history/
 
 # ===== OS =====
 .DS_Store
+._*
+.AppleDouble
 Thumbs.db
+Desktop.ini
+.directory
+
+# ===== PID & runtime =====
+*.pid
 
 # ===== Docker =====
-*.pid
+docker-compose.override.yml
 
 # ===== Node (si frontend dans le monorepo plus tard) =====
 node_modules/
 dist/
+build/

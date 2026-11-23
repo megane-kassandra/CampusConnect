@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: eureka-server
+  config:
+    # Le préfixe "optional:" est CRUCIAL.
+    # Il permet à Eureka de démarrer même si le Config Server est down.
+    import: "optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}"
+  cloud:
+    config:
+      username: config-client
+      password: ${CONFIG_CLIENT_PASSWORD}
