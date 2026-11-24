@@ -2,4 +2,6 @@ from django.apps import AppConfig
 
 
 class FacialAuthConfig(AppConfig):
-    name = 'facial_auth'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "facial_auth"
+    verbose_name = "Authentification faciale"

@@ -10,7 +10,7 @@ patron Factory + Strategy).
 
 Le service gère :
 
-- l'**inscription par étapes** (identifiants + empreinte WebAuthn + visage avec vivacité) ;
+- l'**inscription par étapes** (identifiants + empreinte WebAuthn + enrôlement du visage) ;
 - la **génération du QR code** personnel (jeton opaque signé, révocable) ;
 - la **connexion multi-méthodes** : mot de passe, empreinte, visage ;
 - l'émission et la révocation des **JWT** (access 15 min, refresh 7 jours avec rotation) ;
@@ -34,11 +34,11 @@ valident le JWT localement (HS256 pour la démo, RS256 + JWKS en production).
 | Couche | Choix |
 |---|---|
 | Langage | Python 3.12 |
-| Framework | Django 5 + Django REST Framework |
+| Framework | Django 6.1 + Django REST Framework |
 | Base de données | PostgreSQL (`auth_db`) |
 | Gestionnaire de paquets | **uv** (avec `requirements.txt` de secours pour pip) |
 | Authentification | JWT HS256 (démo) / RS256 (prod) |
-| Biométrie | WebAuthn (empreinte), embeddings faciaux chiffrés AES/Fernet (visage) |
+| Biométrie | WebAuthn (empreinte), index facial 1:N dans AWS Rekognition |
 | Conteneurisation | Docker (une image, une base) |
 | Configuration | Spring Cloud Config Server (config centralisée) |
 
@@ -62,11 +62,15 @@ authentication/                    ← app Django "cœur" (domaine auth)
 ├── services/
 │   ├── authentication_service.py  ← SEUL à émettre des jetons, écrire l'audit
 │   └── token_service.py
+├── models.py                      ← User et FaceCredential (données centrales)
 ├── domain/exceptions.py
 └── container.py                   ← SEULE racine de composition
 
 facial_auth/                       ← app Django "stratégie visage"
-└── strategy.py                    ← FaceAuthentication(Authentication, Enrollable)
+├── strategy.py                    ← FaceAuthentication(Authentication, Enrollable)
+├── rekognition.py                 ← détection OpenCV + enrôlement/recherche AWS 1:N
+├── views.py / urls.py             ← caméra de démo et endpoint de reconnaissance
+└── templates/ + static/           ← capture périodique webcam
 
 fingerprint_auth/                  ← app Django "stratégie empreinte"
 └── strategy.py                    ← FingerprintAuthentication(Authentication, Enrollable)
@@ -78,7 +82,7 @@ fingerprint_auth/                  ← app Django "stratégie empreinte"
 2. **`container.py` est le SEUL fichier qui importe les 3 apps** — c'est la racine de composition.
 3. La Factory **ne connaît pas** les apps externes : elle reçoit un `Dict[AuthMethod, Callable]` déjà peuplé par `container.py`.
 4. **Aucun `models.py`** dans `facial_auth` / `fingerprint_auth` (les templates restent dans `authentication/models.py`).
-5. Ajouter une méthode = **(a)** une valeur dans `AuthMethod`, **(b)** une classe dans `strategies/`, **(c)** une ligne dans `container.py`, **(d)** ses tests.
+5. Ajouter une méthode = **(a)** une valeur dans `AuthMethod`, **(b)** une stratégie dans l'app correspondante, **(c)** une ligne dans `container.py`, **(d)** ses tests.
 
 ---
 
@@ -143,23 +147,26 @@ JWT_SECRET=changez-moi-32-caracteres-minimum
 JWT_ACCESS_TTL_MINUTES=15
 JWT_REFRESH_TTL_DAYS=7
 
-# Biométrie (chiffrement des embeddings)
-BIOMETRIC_KEY=changez-moi-cle-fernet
+# AWS Rekognition (reconnaissance faciale 1:N)
+AWS_REGION=eu-west-1
+AWS_REKOGNITION_COLLECTION=campusconnect-auth-faces
+FACE_MATCH_THRESHOLD=80.0
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
 
 # Config Server (Spring Cloud Config)
 CONFIG_SERVER_URL=http://localhost:8888
 CONFIG_CLIENT_PASSWORD=changez-moi
 ```
 
-> Générer les clés : `openssl rand -base64 32` (JWT_SECRET) et
-> `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`
-> (BIOMETRIC_KEY).
+> Générer la clé JWT : `openssl rand -base64 32`. Pour AWS, privilégier un profil local ou
+> un rôle IAM en déploiement plutôt que des clés statiques.
 
 ### Variante Config Server (production)
 
 En production, les valeurs **non sensibles** sont lues depuis le dépôt de configuration
 `campusconnect-config-repo/auth-service.yml`. Les secrets (`JWT_SECRET`,
-`BIOMETRIC_KEY`, `DB_PASSWORD`) restent en variables d'environnement.
+`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` et `DB_PASSWORD`) restent en variables d'environnement.
 
 Le branchement se fait via `spring.config.import` (côté client) — hors scope de ce README.
 
@@ -173,6 +180,11 @@ cd auth_service
 # 1. Créer la base PostgreSQL (une seule fois)
 sudo -u postgres createdb auth_db
 sudo -u postgres createuser auth_user -P
+
+# Le modèle utilisateur custom est encore à créer. Avant la toute première migration,
+# ajoutez-le à authentication/models.py et définissez AUTH_USER_MODEL. Générez ensuite
+# les migrations ensemble pour le modèle utilisateur et FaceCredential.
+uv run python manage.py makemigrations authentication
 
 # 2. Appliquer les migrations
 uv run python manage.py migrate
@@ -234,7 +246,8 @@ Structure des tests (à venir) :
 | Endpoints `/api/auth/register`, `/login`, `/refresh`, `/logout` | ⏳ À faire |
 | QR code personnel (génération, scan, révocation) | ⏳ À faire (P1 du cahier) |
 | WebAuthn (empreinte) | ⏳ P2 |
-| Reconnaissance faciale (avec vivacité) | ⏳ P3 |
+| Reconnaissance faciale 1:N (détection + recherche AWS) | ✅ Implémentée dans `facial_auth` |
+| Détection de vivacité anti-spoofing | ⏳ À concevoir séparément |
 | Tests ≥ 85 % | ⏳ À faire |
 | Docker | ⏳ À faire |
 
