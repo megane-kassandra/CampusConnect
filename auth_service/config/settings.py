@@ -83,16 +83,32 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'auth_db'),
-        'USER': os.getenv('DB_USER', 'auth_user'),
-        'PASSWORD': os.getenv('DB_PASSWORD', ''),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '5434'),
+DB_ENGINE = os.getenv("DB_ENGINE", "sqlite").lower()
+
+if DB_ENGINE == "sqlite":
+
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+
+elif DB_ENGINE == "postgresql":
+
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("DB_NAME", "auth_db"),
+            "USER": os.getenv("DB_USER", "auth_user"),
+            "PASSWORD": os.getenv("DB_PASSWORD", ""),
+            "HOST": os.getenv("DB_HOST", "localhost"),
+            "PORT": os.getenv("DB_PORT", "5434"),
+        }
+    }
+
+else:
+    raise ValueError(f"Base de données non supportée : {DB_ENGINE}")
 
 
 # Password validation
@@ -149,3 +165,12 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+
+# WebAuthn : l'origine est celle du navigateur, pas celle du conteneur Django.
+WEBAUTHN_RP_ID = os.getenv('WEBAUTHN_RP_ID', 'localhost')
+WEBAUTHN_RP_NAME = 'CampusConnect'
+WEBAUTHN_ORIGIN = os.getenv('WEBAUTHN_ORIGIN', 'http://localhost:8081')
+WEBAUTHN_POLICY_VERSION = '1.0'
+WEBAUTHN_MAX_CREDENTIALS = 5
+WEBAUTHN_DEMO_ENABLED = DEBUG and os.getenv('WEBAUTHN_DEMO_ENABLED', 'true').lower() == 'true'

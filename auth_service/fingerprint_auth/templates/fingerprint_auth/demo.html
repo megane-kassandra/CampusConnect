@@ -1,0 +1,27 @@
+{% load static %}
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="csrf-token" content="{{ csrf_token }}"><title>CampusConnect | WebAuthn</title><link rel="stylesheet" href="{% static 'fingerprint_auth/style.css' %}"></head>
+<body><main id="app"
+ data-consent="{% url 'fingerprint_auth:consent' %}"
+ data-register-options="{% url 'fingerprint_auth:registration_options' %}"
+ data-register-verify="{% url 'fingerprint_auth:registration_verify' %}"
+ data-login-options="{% url 'fingerprint_auth:login_options' %}"
+ data-login-verify="{% url 'fingerprint_auth:login_verify' %}"
+ data-credentials="{% url 'fingerprint_auth:credentials' %}">
+ <header><small>CAMPUSCONNECT · AUTH SERVICE</small><h1>Authentification WebAuthn</h1><p>Enregistrement et vérification d'une passkey avec le mécanisme de sécurité de ton appareil.</p></header>
+ {% if user.is_authenticated %}
+ <section><h2>1. Enrôlement</h2><p>Compte connecté : <strong>{{ user.get_username }}</strong></p>
+ <p>Finalité : accès à CampusConnect. La clé publique est conservée jusqu'au retrait du consentement ou à la suppression du compte. Ton empreinte et ta clé privée restent sur ton appareil.</p>
+ <label><input type="checkbox" id="consent"> J'accepte l'enregistrement de cette passkey (politique 1.0).</label>
+ <p><button id="register">Enregistrer une passkey</button></p>
+ <button id="list" class="secondary">Afficher mes passkeys</button> <button id="withdraw" class="danger">Retirer le consentement</button>
+ <ul id="credentials"></ul>
+ <form method="post" action="{% url 'fingerprint_auth:signout' %}">{% csrf_token %}<button class="secondary">Fermer la session de démo</button></form>
+ </section>
+ {% else %}
+ <section><h2>1. Enrôlement</h2><p>Pour associer une nouvelle passkey, connecte-toi d'abord avec ton compte.</p><a href="{% url 'fingerprint_auth:signin' %}">Connexion avec mot de passe</a></section>
+ {% endif %}
+ <section><h2>2. Vérification biométrique</h2><p>Choisis une passkey existante. Ton appareil peut demander ton empreinte, ton visage ou ton PIN.</p><button id="login">Vérifier ma passkey</button></section>
+ <pre id="status" role="status" aria-live="polite">Prêt.</pre>
+ <p class="note">Démo : le résultat identifie le compte, mais ne crée pas de JWT ni de session de connexion.</p>
+</main><script src="{% static 'fingerprint_auth/webauthn.js' %}" defer></script></body></html>

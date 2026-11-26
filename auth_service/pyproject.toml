@@ -17,6 +17,7 @@ dependencies = [
     "numpy>=2.0",
     "opencv-python-headless>=4.10",
     "Pillow>=11.0",
+    "webauthn>=3.0.1",
 ]
 
 [project.scripts]

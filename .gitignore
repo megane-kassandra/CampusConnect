@@ -137,3 +137,25 @@ Thumbs.db
 *.pid
 diagnostic.txt
 *.bak
+# Biometric data
+media/
+face_references/
+visage.jpg
+visage.png
+auth_service_context.txt
+
+# Tests and logs
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.log
+
+# Django generated files
+staticfiles/
+
+# IDE
+.vscode/
+.idea/
+
+.env
