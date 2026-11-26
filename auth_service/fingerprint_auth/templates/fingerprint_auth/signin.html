@@ -1,0 +1,6 @@
+{% load static %}
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Connexion de démonstration</title><link rel="stylesheet" href="{% static 'fingerprint_auth/style.css' %}"></head>
+<body><main><h1>Connexion de démonstration</h1><p>Connecte-toi avec ton compte Django avant d'enregistrer une passkey.</p>
+<form method="post">{% csrf_token %}{{ form.as_p }}<button type="submit">Se connecter</button></form>
+<p><a href="{% url 'fingerprint_auth:demo' %}">Retour</a></p></main></body></html>

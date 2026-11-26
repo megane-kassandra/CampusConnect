@@ -76,3 +76,86 @@ docker-compose.override.yml
 node_modules/
 dist/
 build/
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# ===== uv / venv =====
+.venv/
+venv/
+env/
+.uv/
+
+# ===== Django =====
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+/media/
+/staticfiles/
+staticfiles.json
+
+# ===== Env & secrets =====
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.crt
+*.secret
+
+# ===== Tests & coverage =====
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.pytest_cache/
+.tox/
+.nox/
+
+# ===== IDE =====
+.idea/
+.vscode/
+*.swp
+*.swo
+.classpath
+.project
+.settings/
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+
+# ===== CampusConnect (fichiers locaux de debug) =====
+*.pid
+diagnostic.txt
+*.bak
+# Biometric data
+media/
+face_references/
+visage.jpg
+visage.png
+auth_service_context.txt
+
+# Tests and logs
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.log
+
+# Django generated files
+staticfiles/
+
+# IDE
+.vscode/
+.idea/
+
+.env
